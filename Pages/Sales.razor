@@ -1,0 +1,303 @@
+﻿@page "/sales"
+@using System.Text.Json
+@using System.IO;
+
+
+<PageTitle>Animal Sale</PageTitle>
+
+<h1>Animals to sale</h1>
+
+
+@if (animals == null )
+{
+    <p><em>Loading...</em></p>
+}
+else
+{ 
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Breed</th>
+                <th>BirthDate</th>
+                <th>Sex</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th style="display: flex; justify-content: center ;margin: auto; height: 90%">Select</th>
+            </tr>
+        </thead>
+                
+        <tbody>
+
+            @foreach (var animal in animals)
+            {
+                
+                <tr>
+                    <td>@animal.Id</td>
+                    <td>@animal.Name</td>
+                    <td>@animal.Breed</td>
+                    <td>@animal.BirthDate.ToShortDateString()</td>
+                    <td>@animal.Sex</td>
+                    <td>@animal.Price</td>
+                    <td>@animal.Status</td>
+                      <td >
+                        <input type="checkbox"  style="display: flex; justify-content: center;margin: auto"  @bind=@animal.isChecked  @onclick="()=>AddAnimal(animal)"/>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+<h3>Animals Selected</h3>
+        <table class="table">
+
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Breed</th>
+                <th>BirthDate</th>
+                <th>Sex</th>
+                <th>Price</th>
+                <th>Status</th>
+                
+            </tr>
+        </thead>
+
+
+            @if (checkedAnimals.Count==0)
+            {
+            
+                <p><em>You don't have Animals selected</em></p>
+            }
+            else{
+            <tbody>
+            @foreach (var animal in checkedAnimals)
+            {
+              
+                <tr>
+                    <td>@animal.Id</td>
+                    <td>@animal.Name</td>
+                    <td>@animal.Breed</td>
+                    <td>@animal.BirthDate.ToShortDateString()</td>
+                    <td>@animal.Sex</td>
+                    <td>@animal.Price</td>
+                    <td>@animal.Status</td>
+                      
+                </tr>
+            }
+        </tbody>
+        }
+    </table>
+    <h3>Summary </h3>
+        <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Breed</th>
+                <th>Quantity</th>
+                <th>Value</th>
+                <th>% Discount</th>
+                <th>Value of discount</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+          @if (checkedAnimals.Count==0)
+            {
+            
+                <p><em>You don't have Animals selected</em></p>
+            }
+            else{
+            <tbody>
+            @foreach (var animalSummary in animalsSummary)
+            {
+              
+                <tr>
+                    <td>@animalSummary.Id</td>
+                    <td>@animalSummary.Breed</td>
+                    <td>@animalSummary.Quantity</td>
+                    <td>@animalSummary.DiscountPercent</td>
+                    <td>@animalSummary.DiscountValue</td>
+                    <td>@animalSummary.Subtotal</td>
+                    
+                </tr>
+            }
+        </tbody>
+        }
+    </table>
+}
+
+@code {
+    private String fileAnimalPath = "Data/Animal.json";
+    private String fileGenderPath = "Data/Gender.json";
+    private String fileStatusPath = "Data/Status.json";
+    private String fileDatosPath = "Data/datos.json";
+
+    List<Animal> animals = new List<Animal>();
+    List<Animal> checkedAnimals = new List<Animal>();
+    List<AnimalSummary> animalsSummary = new List<AnimalSummary>();
+    List<Gender> genders = new List<Gender>();
+    List<State> states = new List<State>();
+    List<AnimalSummary> datos = new List<AnimalSummary>();
+    AnimalSummary animalSummary = new AnimalSummary();
+    public Animal newAnimal= new Animal();
+    private Boolean isAddedAnimal  = false;
+    private ElementReference focusName;
+    int maxId = 0;
+
+    protected override void OnInitialized()
+    {
+        // Leer datos desde el archivo JSON si existe
+        if (File.Exists(fileAnimalPath) && File.Exists(fileGenderPath )  && File.Exists(fileStatusPath)  )
+        {
+
+            string jsonAnimal = File.ReadAllText(fileAnimalPath);
+            string jsonGender = File.ReadAllText(fileGenderPath);
+            string jsonStatus = File.ReadAllText(fileStatusPath);
+            string jsonAnimalsSummary = File.ReadAllText(fileDatosPath);
+            animals = JsonSerializer.Deserialize<List<Animal>>(jsonAnimal);
+            genders = JsonSerializer.Deserialize<List<Gender>>(jsonGender);
+            states = JsonSerializer.Deserialize<List<State>>(jsonStatus);
+            datos = JsonSerializer.Deserialize<List<AnimalSummary>>(jsonAnimalsSummary);
+
+
+
+        }
+    }
+
+    public class Animal
+    {
+
+        public int Id { get; set; } = 0;
+
+        public string? Name { get; set; }
+
+        public string Breed { get; set; } = "Holstein";
+
+        public DateTime BirthDate { get; set; }
+
+        public string? Sex { get; set; }
+
+        public int Price { get; set; } = 0;
+
+        public string? Status { get; set; }
+
+        public Boolean isChecked { get; set; }
+    }
+
+    public class AnimalSummary
+    {
+
+        public int Id { get; set; } = 0;
+
+        public string? Breed { get; set; }
+
+        public int Quantity { get; set; } = 0;
+
+        public int Value { get; set; } = 0;
+
+        public float DiscountPercent { get; set; } = 0;
+
+        public float DiscountValue { get; set; } = 0;
+
+        public float Subtotal { get; set; } = 0;
+    }
+
+    public class Gender
+    {
+
+        public int Id { get; set; }
+
+        public string? Name { get; set; }
+    }
+
+    public class State
+    {
+        public int Id { get; set; }
+
+        public string? Name { get; set; }
+    }
+
+
+    private void AddAnimal(Animal animal)
+    {
+        if (animal.isChecked==false)
+        {
+            Console.WriteLine(animal);
+            checkedAnimals.Add(animal);
+
+        }
+        else
+        {
+            var animalToDelete = checkedAnimals.FirstOrDefault(a => a.Id == animal.Id);
+            if (animalToDelete != null)
+            {
+                checkedAnimals.Remove(animalToDelete);
+            }
+
+        }
+        UpdateSummary();
+    }
+
+
+    void UpdateSummary()
+    {
+        var  idCount=0;
+        animalsSummary = new List<AnimalSummary>();
+
+        Console.WriteLine("Entrando");
+        if(checkedAnimals.Count > 0)
+
+        {
+            foreach (var anim in checkedAnimals)
+            {
+                
+                if (BreedExistsInAnimalsSummary(anim.Breed))
+                {
+                idCount++;
+                animalSummary.Id = idCount;
+                animalSummary.Breed = anim.Breed;
+                animalSummary.Quantity = CountAnimalsByBreed(anim.Breed);
+                animalSummary.Value = SumPriceByBreed(anim.Breed);
+                Console.WriteLine("Breed:",anim.Breed);
+                Console.WriteLine("Quantity: ",CountAnimalsByBreed(anim.Breed));
+                Console.WriteLine("TotalPrice: ",SumPriceByBreed(anim.Breed));
+                animalsSummary.Add(animalSummary);
+                }
+               
+
+
+            }
+        }
+        string jsonFile = JsonSerializer.Serialize(animalsSummary);
+        File.WriteAllText(fileDatosPath, jsonFile);
+        Console.WriteLine("Saliendo");
+    }
+
+    int SumPriceByBreed(string breed)
+    {
+        return checkedAnimals.Where(animal => animal.Breed == breed).Sum(animal => animal.Price);
+    }
+
+    int CountAnimalsByBreed(string breed)
+    {
+        return checkedAnimals.Count(animal => animal.Breed == breed);
+    }
+
+    Boolean BreedExistsInAnimalsSummary(String breed)
+    {
+        var countBreed=checkedAnimals.Count(animal => animal.Breed == breed);
+
+        return countBreed > 0 ?true:false ;
+    }
+}
+
+
+
+
+
+
+
+

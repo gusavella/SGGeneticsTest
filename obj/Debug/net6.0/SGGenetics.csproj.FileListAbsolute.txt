@@ -28,3 +28,4 @@ C:\Cursos\.net core\SGGenetics\obj\Debug\net6.0\SGGenetics.genruntimeconfig.cach
 C:\Cursos\.net core\SGGenetics\bin\Debug\net6.0\Data\Animal.json
 C:\Cursos\.net core\SGGenetics\bin\Debug\net6.0\Data\Gender.json
 C:\Cursos\.net core\SGGenetics\bin\Debug\net6.0\Data\Status.json
+C:\Cursos\.net core\SGGenetics\bin\Debug\net6.0\Data\datos.json

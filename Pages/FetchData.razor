@@ -109,15 +109,12 @@ else
         // Leer datos desde el archivo JSON si existe
         if (File.Exists(fileAnimalPath) && File.Exists(fileGenderPath )  && File.Exists(fileStatusPath)  )
         {
-
             string jsonAnimal = File.ReadAllText(fileAnimalPath);
             string jsonGender = File.ReadAllText(fileGenderPath);
             string jsonStatus = File.ReadAllText(fileStatusPath);
             animals = JsonSerializer.Deserialize<List<Animal>>(jsonAnimal);
             genders = JsonSerializer.Deserialize<List<Gender>>(jsonGender);
             states = JsonSerializer.Deserialize<List<State>>(jsonStatus);
-
-
 
         }
     }
@@ -168,7 +165,7 @@ else
         }
         else
         {
-             focusName.FocusAsync();
+            
             UpdateAnimal(newAnimal);
         }
     }

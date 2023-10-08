@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Data\datos.json" />
     <Content Remove="datos.json" />
     <Content Remove="Pages\Counter.razor" />
   </ItemGroup>
