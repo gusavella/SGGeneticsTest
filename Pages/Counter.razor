@@ -1,0 +1,134 @@
+﻿@page "/counter"
+@using System.Text.Json
+<!-- Lista de personas -->
+<h3>Lista de Personas</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var persona in personas)
+        {
+            <tr>
+                <td>@persona.Id</td>
+                <td>@persona.Nombre</td>
+                <td>@persona.Edad</td>
+                <td>
+                    <button @onclick="() => EditarPersona(persona)">Editar</button>
+                    <button @onclick="() => BorrarPersona(persona.Id)">Borrar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Formulario para crear/editar persona -->
+<h3>Crear/Editar Persona</h3>
+<form>
+    <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input id="nombre" class="form-control" @bind="nuevaPersona.Nombre" />
+    </div>
+    <div class="form-group">
+        <label for="edad">Edad:</label>
+        <input id="edad" class="form-control" @bind="nuevaPersona.Edad" />
+    </div>
+    <button @onclick="AgregarEditarPersona" class="btn btn-primary">Guardar</button>
+</form>
+
+@code {
+    private String filePath = "Data/datos.json";
+    public class Persona
+    {
+        public int Id { get; set; }=0;
+        public string Nombre { get; set; } = "Sin nombre";
+        public int Edad { get; set; }
+}
+
+protected override void OnInitialized()
+{
+    // Leer datos desde el archivo JSON si existe
+    if (File.Exists(@"Data/datos.json"))
+    {
+          Console.WriteLine("Me fui por donde Si era");
+        string json = File.ReadAllText(filePath);
+        personas = JsonSerializer.Deserialize<List<Persona>>(json);
+       
+    }
+     Console.WriteLine("Me fui por donde No era");
+}
+
+    List<Persona> personas = new List<Persona>();
+    Persona nuevaPersona = new Persona();
+
+    // Métodos CRUD
+    void AgregarEditarPersona()
+    {
+        if (nuevaPersona.Id == 0)
+        {
+            AgregarPersona();
+        }
+        else
+        {
+            ActualizarPersona(nuevaPersona);
+        }
+    }
+    void AgregarPersona()
+{
+    // Asignar un nuevo ID, por ejemplo, la siguiente ID disponible
+    nuevaPersona.Id = personas.Count > 0 ? personas.Max(p => p.Id) + 1 : 1;
+
+    // Agregar la nueva persona a la lista
+    personas.Add(nuevaPersona);
+
+    // Guardar la lista actualizada en el archivo JSON
+    GuardarDatosEnArchivo();
+
+    // Reiniciar el objeto para futuras entradas
+    nuevaPersona = new Persona();
+}
+    void EditarPersona(Persona persona)
+    {
+        nuevaPersona = persona;
+    }
+
+  void BorrarPersona(int id)
+{
+    // Buscar la persona por ID y eliminarla de la lista
+    var personaAEliminar = personas.FirstOrDefault(p => p.Id == id);
+    if (personaAEliminar != null)
+    {
+        personas.Remove(personaAEliminar);
+
+        // Guardar la lista actualizada en el archivo JSON
+        GuardarDatosEnArchivo();
+    }
+}
+
+
+    void ActualizarPersona(Persona persona)
+{
+    // Buscar la persona existente por ID y actualizar sus propiedades
+    var personaExistente = personas.FirstOrDefault(p => p.Id == persona.Id);
+    if (personaExistente != null)
+    {
+        personaExistente.Nombre = persona.Nombre;
+        personaExistente.Edad = persona.Edad;
+
+        // Guardar la lista actualizada en el archivo JSON
+        GuardarDatosEnArchivo();
+    }
+}
+
+    void GuardarDatosEnArchivo()
+{
+    string json = JsonSerializer.Serialize(personas);
+    File.WriteAllText(filePath, json);
+}
+
+}

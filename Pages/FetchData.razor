@@ -1,0 +1,259 @@
+﻿@page "/catalog"
+@using System.Text.Json
+@using System.IO;
+
+
+<PageTitle>Animal - ST Genetics</PageTitle>
+
+<h1>Animal clasification</h1>
+
+
+@if (animals == null || genders==null || states == null )
+{
+    <p><em>Loading...</em></p>
+}
+else
+{ <div><button class="btn btn-primary " @onclick="AddAnimal" >Add Animal</button></div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Breed</th>
+                <th>BirthDate</th>
+                <th>Sex</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th style="display: flex; justify-content: center ;margin: auto; height: 90%">Options</th>
+            </tr>
+        </thead>
+                
+        <tbody>
+      @if (@isAddedAnimal)
+    { 
+        
+            <tr class=" shadow"> 
+                <td><label>@newAnimal.Id</label></td>
+                
+                <td><input type="text"  id="name" class="form-control" @bind=@newAnimal.Name @ref="focusName"/></td>
+                <td><input type="text" id="breed" class="form-control" @bind=@newAnimal.Breed/></td>
+                <td> <input type="date" id="birthDate" class="form-control" @bind=@newAnimal.BirthDate /></td>
+                <td>
+                    <select name="gender" class="form-select "  id="gender"   @bind=@newAnimal.Sex >
+                       
+                         @foreach (var gender in genders)
+                                {
+                                 <option id="gender.Id">
+                                    @gender.Name
+                                 </option>
+                                }
+                            </select>
+                </td>
+                <td><input type="number" id="price" class="form-control" @bind=@newAnimal.Price/></td>
+                <td>
+                     <select name="state" class="form-select "  id="state" @bind=@newAnimal.Status   >
+                       
+                         @foreach (var state in states)
+                                {
+                                 <option id="state.Id">
+                                    @state.Name
+                                 </option>
+                                }
+                            </select>
+
+
+                </td>
+                <td><div style="display: flex; justify-content: center ;margin: auto; height: 90%"><button class="btn btn-primary " @onclick=AddEditAnimal>Save</button></div>
+                 </td>
+                
+            </tr>
+       
+    }
+            @foreach (var animal in animals)
+            {
+                
+                <tr>
+                    <td>@animal.Id</td>
+                    <td>@animal.Name</td>
+                    <td>@animal.Breed</td>
+                    <td>@animal.BirthDate.ToShortDateString()</td>
+                    <td>@animal.Sex</td>
+                    <td>@animal.Price</td>
+                    <td>@animal.Status</td>
+                      <td  style="display: flex; justify-content: space-around ;margin: auto; height: 90%">
+                        <div><button class="btn btn-primary " @onclick="() =>EditAnimal(animal)">Edit</button></div>
+                        <div><button class="btn btn-danger " @onclick="() =>DeleteAnimal(animal.Id)">Delete</button></div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private String fileAnimalPath = "Data/Animal.json";
+    private String fileGenderPath = "Data/Gender.json";
+    private String fileStatusPath = "Data/Status.json";
+
+    List<Animal> animals = new List<Animal>();
+    List<Gender> genders = new List<Gender>();
+    List<State> states = new List<State>();
+    public Animal newAnimal= new Animal();
+    private Boolean isAddedAnimal  = false;
+    private ElementReference focusName;
+    int maxId = 0;
+
+    protected override void OnInitialized()
+    {
+        // Leer datos desde el archivo JSON si existe
+        if (File.Exists(fileAnimalPath) && File.Exists(fileGenderPath )  && File.Exists(fileStatusPath)  )
+        {
+
+            string jsonAnimal = File.ReadAllText(fileAnimalPath);
+            string jsonGender = File.ReadAllText(fileGenderPath);
+            string jsonStatus = File.ReadAllText(fileStatusPath);
+            animals = JsonSerializer.Deserialize<List<Animal>>(jsonAnimal);
+            genders = JsonSerializer.Deserialize<List<Gender>>(jsonGender);
+            states = JsonSerializer.Deserialize<List<State>>(jsonStatus);
+
+
+
+        }
+    }
+
+
+
+    public class Animal
+    {
+
+        public int Id { get; set; } = 0;
+
+        public string? Name { get; set; }
+
+        public string? Breed { get; set; }
+
+        public DateTime BirthDate { get; set; }
+
+        public string? Sex { get; set; }
+
+        public int? Price { get; set; }
+
+        public string? Status { get; set; } 
+
+    }
+
+
+    public class Gender
+    {
+
+        public int Id { get; set; }
+
+        public string? Name { get; set; }
+    }
+
+    public class State
+    {
+        public int Id { get; set; }
+
+        public string? Name { get; set; }
+    }
+
+    void AddEditAnimal()
+    {
+       
+        if (newAnimal.Id == 0)
+        {
+            SaveNewAnimal();
+        }
+        else
+        {
+             focusName.FocusAsync();
+            UpdateAnimal(newAnimal);
+        }
+    }
+
+    private void AddAnimal()
+    {
+        newAnimal = new Animal();
+
+        if (isAddedAnimal) {
+            isAddedAnimal = false; 
+        }
+        else {
+
+            newAnimal.Name = null;
+            newAnimal.Breed = null;
+            newAnimal.Sex = null;
+            newAnimal.Status = null;
+            newAnimal.Price = null;
+            newAnimal.BirthDate = DateTime.Now;
+
+            isAddedAnimal  = true; 
+        }
+
+    }
+
+
+    private  void  SaveNewAnimal()
+    {
+        newAnimal.Sex= newAnimal.Sex is not null? newAnimal.Sex: genders[0].Name;
+        newAnimal.Status = newAnimal.Status is not null ?newAnimal.Status: states[0].Name;
+        if (animals is not null)
+        {
+            maxId = animals.Max(animal => animal.Id)>0? animals.Max(animal => animal.Id) + 1  : 1 ;
+            newAnimal.Id = maxId;
+            animals.Add(newAnimal);
+            SaveInFile(animals);
+            newAnimal = new Animal();
+            isAddedAnimal = false;
+
+        }
+
+
+    }
+    void SaveInFile(List<Animal> animals)
+    {
+        string jsonFile = JsonSerializer.Serialize(animals);
+        File.WriteAllText(fileAnimalPath, jsonFile);
+    }
+
+     void EditAnimal(Animal animal)
+    {   isAddedAnimal = true;
+        newAnimal = animal;
+    }
+
+    private void UpdateAnimal( Animal animal)
+    {
+        isAddedAnimal = true;
+
+        var actualAnimal = animals.FirstOrDefault(p => p.Id == animal.Id);
+        if (actualAnimal != null)
+        {
+            actualAnimal.Name = animal.Name;
+            actualAnimal.Breed = animal.Breed;
+            actualAnimal.BirthDate = animal.BirthDate;
+            actualAnimal.Sex = animal.Sex;
+            actualAnimal.Price = animal.Price;
+            actualAnimal.Status= animal.Status;
+
+        SaveInFile(animals);
+         isAddedAnimal = false;
+    }
+
+    }
+
+   void DeleteAnimal(int id)
+{
+    var animalToDelete = animals.FirstOrDefault(animal => animal.Id == id);
+    if (animalToDelete != null)
+    {
+       animals.Remove(animalToDelete);
+       SaveInFile(animals);
+    }
+}
+
+ }
+
+
+
