@@ -101,7 +101,7 @@ else
                 <th>Value</th>
                 <th>% Discount</th>
                 <th>Value of discount</th>
-                <th>Subtotal</th>
+                <th style="display: flex; justify-content: center;margin: auto">Subtotal</th>
             </tr>
         </thead>
           @if (checkedAnimals.Count==0)
@@ -121,28 +121,48 @@ else
                     <td>@animalSummary.Value</td>
                     <td>@animalSummary.DiscountPercent</td>
                     <td>@animalSummary.DiscountValue</td>
-                    <td>@animalSummary.Subtotal</td>
+                    <td style="display: flex; justify-content: center;margin: auto">@animalSummary.Subtotal</td>
                     
                 </tr>
             }
             <tr>
                 <td></td>
                     <td></td>
-                    <th>Total Animals</th>
+                    <th style="display: flex; justify-content: center;margin: auto">Total Animals</th>
                     <td></td>
                     <td></td>
                     <td></td>
-                    <th>Total</th>
+                    <th style="display: flex; justify-content: center;margin: auto">Total in Animals</th>
 
             </tr>
             <tr>
                    <td></td>
                     <td></td>
-                    <td>@totalAnimals</td>
+                    <td style="display: flex; justify-content: center;margin: auto">@totalAnimals</td>
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td>@totalPrice</td>
+                    <td style="display: flex; justify-content: center;margin: auto">@totalPrice</td>
+
+            </tr>
+             <tr>
+                   <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <th>Freight </th>
+                    <td style="display: flex; justify-content: center;margin: auto">@totalFreight</td>
+
+            </tr>
+             <tr>
+                   <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <th>Total  </th>
+                    <td style="display: flex; justify-content: center;margin: auto">@totalToPaid</td>
 
             </tr>
         </tbody>
@@ -167,6 +187,8 @@ else
     private Boolean isAddedAnimal  = false;
     public float totalPrice = 0;
     public int totalAnimals = 0;
+    public float totalFreight=1000;
+    public float totalToPaid=0;
     private ElementReference focusName;
     int maxId = 0;
 
@@ -248,7 +270,7 @@ else
     {
         if (animal.isChecked==false)
         {
-            Console.WriteLine(animal);
+
             checkedAnimals.Add(animal);
 
         }
@@ -288,31 +310,38 @@ else
                     }
                 }
             }
-            foreach (var breed in BreedsInSelectedAnimals)
-            {
 
+            foreach (var breed in BreedsInSelectedAnimals)
+
+            {
                 animalSummary = new AnimalSummary();
                 idCount++;
                 animalSummary.Id = idCount;
                 animalSummary.Breed = breed;
                 animalSummary.Quantity = CountAnimalsByBreed(breed);
                 animalSummary.Value = SumPriceByBreed(breed);
+                animalSummary.DiscountPercent = 0;
                 animalSummary.Subtotal = SumPriceByBreed(breed);
-                Console.WriteLine("Breed:", breed);
-                Console.WriteLine("Quantity: ", CountAnimalsByBreed(breed));
-                Console.WriteLine("TotalPrice: ", SumPriceByBreed(breed));
                 animalsSummary.Add(animalSummary);
             }
 
+        }
+        totalPrice = animalsSummary.Sum(animal => animal.Subtotal);
+        totalAnimals=animalsSummary.Sum(animal => animal.Quantity);
 
-            totalPrice = animalsSummary.Sum(animal => animal.Subtotal);
-            totalAnimals=animalsSummary.Sum(animal => animal.Quantity);
+        ValidateDiscount(totalPrice, totalAnimals,animalsSummary);
+
+        totalPrice = animalsSummary.Sum(animal => animal.Subtotal);
+
+        if (totalAnimals>=20)
+        {
+            totalFreight = 0;
         }
 
+        totalToPaid = totalPrice + totalFreight;
 
-        string jsonFile = JsonSerializer.Serialize(BreedsInSelectedAnimals);//animalsSummary
+        string jsonFile = JsonSerializer.Serialize(checkedAnimals);//animalsSummary
         File.WriteAllText(fileDatosPath, jsonFile);
-        Console.WriteLine("Saliendo");
     }
 
     int SumPriceByBreed(string breed)
@@ -330,6 +359,31 @@ else
         var countBreed=checkedAnimals.Count(animal => animal.Breed == breed);
 
         return countBreed > 0 ?true:false ;
+    }
+
+    void ValidateDiscount(float totalPrice, int totalAnimals,List<AnimalSummary> animalsSummary )
+    {
+        var discountPercent = 0;
+        if (totalAnimals >= 5 && totalAnimals < 10 )
+        {
+            discountPercent=5;
+        }
+        if (totalAnimals >= 10  )
+        {
+            discountPercent = 8;
+        }
+        if (discountPercent>0){
+            foreach (var AnimalSummary in animalsSummary)
+
+            {
+                AnimalSummary.DiscountPercent =discountPercent;
+                AnimalSummary.DiscountValue = AnimalSummary.Value * discountPercent/100;
+                AnimalSummary.Subtotal = AnimalSummary.Value - AnimalSummary.DiscountValue;
+
+            }
+        }
+         
+
     }
 }
 
