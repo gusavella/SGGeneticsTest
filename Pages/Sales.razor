@@ -205,7 +205,7 @@ else
             animals = JsonSerializer.Deserialize<List<Animal>>(jsonAnimal);
             genders = JsonSerializer.Deserialize<List<Gender>>(jsonGender);
             states = JsonSerializer.Deserialize<List<State>>(jsonStatus);
-            // datos = JsonSerializer.Deserialize<List<AnimalSummary>>(jsonAnimalsSummary);
+            //  animalsSummary = JsonSerializer.Deserialize<List<AnimalSummary>>(jsonAnimalsSummary);
 
 
 
@@ -280,6 +280,7 @@ else
             if (animalToDelete != null)
             {
                 checkedAnimals.Remove(animalToDelete);
+
             }
 
         }
@@ -292,7 +293,7 @@ else
         var  idCount=0;
         List<String> BreedsInSelectedAnimals=new List<String>();
         animalsSummary = new List<AnimalSummary>();
-        Console.WriteLine("Entrando");
+
         if(checkedAnimals.Count > 0)
 
         {
@@ -336,6 +337,10 @@ else
         if (totalAnimals>=20)
         {
             totalFreight = 0;
+        }
+        else
+        {
+            totalFreight = 1000;
         }
 
         totalToPaid = totalPrice + totalFreight;
