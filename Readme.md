@@ -1,4 +1,4 @@
 # ***ST GENETICS TEST***
 ## Diseño 
-#### Homepage: 
-![HomePage](./Wireframe/Home.jpg)
+#### Animal Catalog: 
+![AnimalCatalog](./Wireframe/Animal Catalog.jpg)
