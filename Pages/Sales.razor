@@ -118,12 +118,33 @@ else
                     <td>@animalSummary.Id</td>
                     <td>@animalSummary.Breed</td>
                     <td>@animalSummary.Quantity</td>
+                    <td>@animalSummary.Value</td>
                     <td>@animalSummary.DiscountPercent</td>
                     <td>@animalSummary.DiscountValue</td>
                     <td>@animalSummary.Subtotal</td>
                     
                 </tr>
             }
+            <tr>
+                <td></td>
+                    <td></td>
+                    <th>Total Animals</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <th>Total</th>
+
+            </tr>
+            <tr>
+                   <td></td>
+                    <td></td>
+                    <td>@totalAnimals</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>@totalPrice</td>
+
+            </tr>
         </tbody>
         }
     </table>
@@ -144,12 +165,14 @@ else
     AnimalSummary animalSummary = new AnimalSummary();
     public Animal newAnimal= new Animal();
     private Boolean isAddedAnimal  = false;
+    public float totalPrice = 0;
+    public int totalAnimals = 0;
     private ElementReference focusName;
     int maxId = 0;
 
     protected override void OnInitialized()
     {
-        // Leer datos desde el archivo JSON si existe
+
         if (File.Exists(fileAnimalPath) && File.Exists(fileGenderPath )  && File.Exists(fileStatusPath)  )
         {
 
@@ -160,7 +183,7 @@ else
             animals = JsonSerializer.Deserialize<List<Animal>>(jsonAnimal);
             genders = JsonSerializer.Deserialize<List<Gender>>(jsonGender);
             states = JsonSerializer.Deserialize<List<State>>(jsonStatus);
-            datos = JsonSerializer.Deserialize<List<AnimalSummary>>(jsonAnimalsSummary);
+            // datos = JsonSerializer.Deserialize<List<AnimalSummary>>(jsonAnimalsSummary);
 
 
 
@@ -245,33 +268,49 @@ else
     void UpdateSummary()
     {
         var  idCount=0;
+        List<String> BreedsInSelectedAnimals=new List<String>();
         animalsSummary = new List<AnimalSummary>();
-
         Console.WriteLine("Entrando");
         if(checkedAnimals.Count > 0)
 
         {
+
             foreach (var anim in checkedAnimals)
             {
-                
-                if (BreedExistsInAnimalsSummary(anim.Breed))
+
+                if (BreedsInSelectedAnimals.Count==0 )
                 {
+                    BreedsInSelectedAnimals.Add(anim.Breed);
+                }
+                else{
+                    if ( BreedsInSelectedAnimals.Any(item => item == anim.Breed) == false) { 
+                        BreedsInSelectedAnimals.Add(anim.Breed);
+                    }
+                }
+            }
+            foreach (var breed in BreedsInSelectedAnimals)
+            {
+
+                animalSummary = new AnimalSummary();
                 idCount++;
                 animalSummary.Id = idCount;
-                animalSummary.Breed = anim.Breed;
-                animalSummary.Quantity = CountAnimalsByBreed(anim.Breed);
-                animalSummary.Value = SumPriceByBreed(anim.Breed);
-                Console.WriteLine("Breed:",anim.Breed);
-                Console.WriteLine("Quantity: ",CountAnimalsByBreed(anim.Breed));
-                Console.WriteLine("TotalPrice: ",SumPriceByBreed(anim.Breed));
+                animalSummary.Breed = breed;
+                animalSummary.Quantity = CountAnimalsByBreed(breed);
+                animalSummary.Value = SumPriceByBreed(breed);
+                animalSummary.Subtotal = SumPriceByBreed(breed);
+                Console.WriteLine("Breed:", breed);
+                Console.WriteLine("Quantity: ", CountAnimalsByBreed(breed));
+                Console.WriteLine("TotalPrice: ", SumPriceByBreed(breed));
                 animalsSummary.Add(animalSummary);
-                }
-               
-
-
             }
+
+
+            totalPrice = animalsSummary.Sum(animal => animal.Subtotal);
+            totalAnimals=animalsSummary.Sum(animal => animal.Quantity);
         }
-        string jsonFile = JsonSerializer.Serialize(animalsSummary);
+
+
+        string jsonFile = JsonSerializer.Serialize(BreedsInSelectedAnimals);//animalsSummary
         File.WriteAllText(fileDatosPath, jsonFile);
         Console.WriteLine("Saliendo");
     }
