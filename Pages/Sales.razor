@@ -14,7 +14,7 @@
 }
 else
 { 
-
+    <div class="container-fluid">
     <table class="table">
         <thead>
             <tr>
@@ -49,8 +49,10 @@ else
             }
         </tbody>
     </table>
+   </div>
 
-<h3>Animals Selected</h3>
+<h3> Selected Animals</h3>
+     <div class="container-fluid">
         <table class="table">
 
         <thead>
@@ -91,16 +93,18 @@ else
         </tbody>
         }
     </table>
+    </div>
     <h3>Summary </h3>
+     <div class="container-fluid">
         <table class="table">
         <thead>
             <tr>
                 <th>Id</th>
                 <th>Breed</th>
-                <th>Quantity</th>
+                <th style="display: flex; justify-content: center;margin: auto">Quantity</th>
                 <th>Value</th>
                 <th>% Discount</th>
-                <th>Value of discount</th>
+                <th >Value of discount</th>
                 <th style="display: flex; justify-content: center;margin: auto">Subtotal</th>
             </tr>
         </thead>
@@ -115,14 +119,14 @@ else
             {
               
                 <tr>
-                    <td>@animalSummary.Id</td>
-                    <td>@animalSummary.Breed</td>
-                    <td>@animalSummary.Quantity</td>
-                    <td>@animalSummary.Value</td>
-                    <td>@animalSummary.DiscountPercent</td>
-                    <td>@animalSummary.DiscountValue</td>
+                    <td >@animalSummary.Id</td>
+                    <td >@animalSummary.Breed</td>
+                    <td style="display: flex; justify-content: center;margin: auto">@animalSummary.Quantity</td>
+                    <td >@animalSummary.Value</td>
+                    <td >@animalSummary.DiscountPercent</td>
+                    <td >@animalSummary.DiscountValue</td>
                     <td style="display: flex; justify-content: center;margin: auto">@animalSummary.Subtotal</td>
-                    
+                     
                 </tr>
             }
             <tr>
@@ -132,7 +136,7 @@ else
                     <td></td>
                     <td></td>
                     <td></td>
-                    <th style="display: flex; justify-content: center;margin: auto">Total in Animals</th>
+                    <td style="display: flex; justify-content: center;margin: auto"><strong>Total in Animals</strong></td>
 
             </tr>
             <tr>
@@ -151,7 +155,7 @@ else
                     <td></td>
                     <td></td>
                     <td></td>
-                    <th>Freight </th>
+                    <td><strong>Freight</strong> </td>
                     <td style="display: flex; justify-content: center;margin: auto">@totalFreight</td>
 
             </tr>
@@ -161,13 +165,14 @@ else
                     <td></td>
                     <td></td>
                     <td></td>
-                    <th>Total  </th>
+                    <td><strong>Total</strong></td>
                     <td style="display: flex; justify-content: center;margin: auto">@totalToPaid</td>
 
             </tr>
         </tbody>
         }
     </table>
+    </div>
 }
 
 @code {
